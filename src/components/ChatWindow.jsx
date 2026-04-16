@@ -20,7 +20,7 @@ export default function ChatWindow({ messages, isTyping, isAnalyzing, onSuggesti
           <div className="welcome-icon">🩺</div>
           <h1 className="welcome-heading">What symptoms are you experiencing?</h1>
           <p className="welcome-subtitle">
-            Describe what you're feeling and MediAI will analyze your symptoms
+            Describe what you're feeling and InferaDx will analyze your symptoms
             to suggest possible conditions. Get instant insights powered by
             advanced medical AI.
           </p>

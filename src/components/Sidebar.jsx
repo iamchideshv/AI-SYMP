@@ -18,7 +18,7 @@ export default function Sidebar({ sessions, activeSession, onSelectSession, onNe
         {/* Logo */}
         <div className="sidebar-logo sidebar-fade-item" style={{ animationDelay: '0ms' }}>
           <span className="sidebar-logo-icon">🩺</span>
-          <span className="sidebar-logo-text">MediAI</span>
+          <span className="sidebar-logo-text">InferaDx</span>
           <span className="sidebar-beta">Beta</span>
         </div>
 

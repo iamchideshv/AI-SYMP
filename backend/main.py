@@ -14,7 +14,7 @@ import google.generativeai as genai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("mediai-backend")
+logger = logging.getLogger("inferadx-backend")
 
 # Load environment variables
 ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
@@ -28,7 +28,7 @@ if not GEMINI_API_KEY and not GROQ_API_KEY:
 else:
     logger.info(f"✅ API Keys identified: Groq={'Yes' if GROQ_API_KEY else 'No'}, Gemini={'Yes' if GEMINI_API_KEY else 'No'}")
 
-app = FastAPI(title="MediAI API", description="AI Symptom Deductor Backend")
+app = FastAPI(title="InferaDx API", description="AI Symptom Deductor Backend")
 
 # Ensure React frontend can reach us
 app.add_middleware(
@@ -90,7 +90,7 @@ def get_wikipedia_context(diagnoses: List[dict]) -> str:
 
 
 SYSTEM_PROMPT = """
-You are MediAI, an advanced medical AI symptom deductor specialized in General Medicine, Oncology, and Neurology. Your objective is to reach a SINGLE final diagnosis through targeted questioning.
+You are InferaDx, an advanced medical AI symptom deductor specialized in General Medicine, Oncology, and Neurology. Your objective is to reach a SINGLE final diagnosis through targeted questioning.
 
 DIAGNOSTIC CONVERGENCE FLOW:
 1. PHASE: INITIAL (Discovery)
@@ -112,7 +112,7 @@ DIAGNOSTIC CONVERGENCE FLOW:
 
 RULES:
 - Marks specialized cases (Cancer/Neurology) with "requires_specialist": true.
-- ALWAYS include a disclaimer (MediAI is not a human doctor) at the beginning of the "insight".
+- ALWAYS include a disclaimer (InferaDx is not a human doctor) at the beginning of the "insight".
 - If medical context is provided, you MUST incorporate relevant clinical facts and your reasoning about them into your "insight".
 - DO NOT mention "Wikipedia" or cite it as a source. Use the information naturally as your own clinical reasoning.
 - DO NOT put any clinical reasoning, disclaimers, or citations in the "question" field.
@@ -192,7 +192,7 @@ async def call_gemini(messages, image_data=None):
 async def health_check():
     return {
         "status": "ok", 
-        "backend": "MediAI FastAPI",
+        "backend": "InferaDx FastAPI",
         "engines": {
             "groq": "available" if client_groq else "missing_key",
             "gemini": "available" if client_gemini else "missing_key"
@@ -254,6 +254,6 @@ async def chat_with_ai(
 
 if __name__ == "__main__":
     print("\n" + "="*50)
-    print("  MediAI Backend - http://127.0.0.1:8000")
+    print("  InferaDx Backend - http://127.0.0.1:8000")
     print("="*50 + "\n")
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

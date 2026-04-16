@@ -1,6 +1,6 @@
 @echo off
 echo ===================================================
-echo   MediAI - Robust Startup Script
+echo   InferaDx - Robust Startup Script
 echo ===================================================
 
 echo [1/3] Checking dependencies...

@@ -190,7 +190,7 @@ const InputArea = forwardRef(function InputArea({ onSend, disabled }, ref) {
       </div>
 
       <div className="input-disclaimer">
-        MediAI is for informational purposes only. Always consult a qualified healthcare professional for medical advice.
+        InferaDx is for informational purposes only. Always consult a qualified healthcare professional for medical advice.
       </div>
     </div>
   )

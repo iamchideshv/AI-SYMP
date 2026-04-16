@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from 'react'
 export function useChat() {
   const [messages, setMessages] = useState(() => {
     // Load from localStorage on init
-    const saved = localStorage.getItem('mediai_messages')
+    const saved = localStorage.getItem('inferadx_messages')
     return saved ? JSON.parse(saved) : []
   })
   const [isTyping, setIsTyping] = useState(false)
@@ -14,7 +14,7 @@ export function useChat() {
   useEffect(() => {
     // Only persist non-blob images (or just exclude images for storage)
     const toSave = messages.map(m => ({ ...m, imageUrl: m.imageUrl?.startsWith('blob:') ? null : m.imageUrl }))
-    localStorage.setItem('mediai_messages', JSON.stringify(toSave))
+    localStorage.setItem('inferadx_messages', JSON.stringify(toSave))
   }, [messages])
 
   const sendMessage = useCallback(async (text, image = null) => {
@@ -97,7 +97,7 @@ export function useChat() {
     setMessages([])
     setIsTyping(false)
     setIsAnalyzing(false)
-    localStorage.removeItem('mediai_messages')
+    localStorage.removeItem('inferadx_messages')
   }, [])
 
   return { messages, isTyping, isAnalyzing, currentModel, sendMessage, clearMessages }
