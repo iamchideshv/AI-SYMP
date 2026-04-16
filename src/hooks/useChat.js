@@ -65,9 +65,12 @@ export function useChat() {
       const aiMessage = {
         id: Date.now() + 1,
         role: 'ai',
-        content: data.message || "I'm having trouble analyzing this right now.",
+        content: data.message || data.insight || data.question || "I'm having trouble analyzing this right now.",
+        insight: data.insight,
+        question: data.question,
         diagnoses: data.diagnoses || [],
-        model_used: data.model_used
+        model_used: data.model_used,
+        phase: data.phase
       }
 
       setMessages(prev => [...prev, aiMessage]);

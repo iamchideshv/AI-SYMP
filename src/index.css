@@ -594,6 +594,19 @@ body {
   border-radius: 12px;
   padding: 16px 18px;
   margin-top: 12px;
+  transition: all 0.4s ease;
+}
+
+.diagnosis-card.is-final {
+  background: rgba(0, 201, 167, 0.12);
+  border: 1px solid var(--teal);
+  box-shadow: 0 8px 32px rgba(0, 201, 167, 0.15);
+  animation: pulse-border 2s infinite alternate;
+}
+
+@keyframes pulse-border {
+  from { border-color: var(--teal); }
+  to { border-color: var(--blue); }
 }
 
 .diagnosis-title {
@@ -603,6 +616,46 @@ body {
   letter-spacing: 2px;
   color: var(--teal);
   margin-bottom: 14px;
+}
+
+/* ===== QUESTION BOX ===== */
+.question-box {
+  background: rgba(0, 98, 255, 0.08);
+  border: 1px solid rgba(0, 98, 255, 0.2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-top: 14px;
+  position: relative;
+  animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 98, 255, 0.1);
+  max-width: 560px;
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.question-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--blue);
+}
+
+.question-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .diagnosis-list {

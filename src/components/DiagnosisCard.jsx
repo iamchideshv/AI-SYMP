@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export default function DiagnosisCard({ diagnoses }) {
+export default function DiagnosisCard({ diagnoses, phase, insight }) {
   const [animated, setAnimated] = useState(false)
 
   useEffect(() => {
@@ -15,8 +15,25 @@ export default function DiagnosisCard({ diagnoses }) {
   }
 
   return (
-    <div className="diagnosis-card" id="diagnosis-card">
-      <div className="diagnosis-title">Possible Conditions</div>
+    <div className={`diagnosis-card ${phase === 'final' ? 'is-final' : ''}`} id="diagnosis-card">
+      <div className="diagnosis-title">
+        {phase === 'final' ? '✅ Final Diagnosis' : 'Possible Conditions'}
+      </div>
+      {insight && (
+        <div className="diagnosis-insight-top" style={{ 
+          marginBottom: '16px', 
+          padding: '12px 14px', 
+          background: 'rgba(255,255,255,0.03)',
+          borderRadius: '8px',
+          borderLeft: '3px solid var(--teal)',
+          fontSize: '13px',
+          lineHeight: '1.6',
+          color: 'rgba(255,255,255,0.85)',
+        }}>
+          {insight}
+        </div>
+      )}
+
       <div className="diagnosis-list">
         {diagnoses.map((d, i) => {
           const level = getLevel(d.confidence)

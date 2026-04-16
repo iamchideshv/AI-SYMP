@@ -4,9 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx concurrently \"npm run dev:frontend\" \"npm run server\"",
+    "dev": "node scripts/kill-ports.js && npx concurrently \"npm run dev:frontend\" \"npm run server\"",
     "dev:frontend": "vite",
-    "server": "python backend/main.py",
+    "server": "python -u backend/main.py",
+    "setup": "npm install && pip install -r backend/requirements.txt",
+    "kill-ports": "node scripts/kill-ports.js",
     "build": "vite build",
     "preview": "vite preview"
   },
