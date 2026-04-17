@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import uvicorn
 import logging
 from typing import List, Optional
@@ -151,13 +152,63 @@ def clean_json_response(content: str) -> dict:
         content = content[:-3]
     return json.loads(content.strip())
 
+# Ordered list of Groq vision models to try (most capable first)
+GROQ_VISION_MODELS = [
+    ("meta-llama/llama-4-scout-17b-16e-instruct", "Groq Vision (Llama 4 Scout)"),
+    ("meta-llama/llama-4-maverick-17b-128e-instruct", "Groq Vision (Llama 4 Maverick)"),
+    ("llama-3.2-11b-vision-preview", "Groq Vision (Llama 3.2 11B)"),
+]
+
 async def call_groq(messages, image_data=None):
     if not client_groq:
         raise Exception("Groq client not initialised")
-    
-    if image_data:
-        raise Exception("Groq engine does not yet support vision analysis in this pipeline.")
 
+    if image_data:
+        b64_image = base64.b64encode(image_data).decode("utf-8")
+        # Build a vision-capable message list — system prompt as text, then image + user question
+        vision_messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": SYSTEM_PROMPT + "\n\nAnalyze the medical image below and provide a structured JSON diagnosis response."
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{b64_image}"
+                        }
+                    }
+                ]
+            }
+        ]
+        # Append any prior conversation history
+        for m in messages[1:]:  # skip first system message we already included
+            if m.get("role") == "user" and isinstance(m.get("content"), str):
+                vision_messages.append({"role": "user", "content": m["content"]})
+            elif m.get("role") == "assistant":
+                vision_messages.append({"role": "assistant", "content": m["content"]})
+
+        # Try each vision model in order until one succeeds
+        last_vision_error = ""
+        for model_id, model_name in GROQ_VISION_MODELS:
+            try:
+                logger.info(f"Trying Groq vision model: {model_id}")
+                completion = client_groq.chat.completions.create(
+                    model=model_id,
+                    messages=vision_messages,
+                    temperature=0.2,
+                )
+                return completion.choices[0].message.content, model_name
+            except Exception as ve:
+                last_vision_error = str(ve)
+                logger.warning(f"Vision model {model_id} failed: {ve}")
+                continue
+
+        raise Exception(f"All Groq vision models failed. Last error: {last_vision_error}")
+
+    # Text-only path
     completion = client_groq.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=messages,
@@ -218,8 +269,12 @@ async def chat_with_ai(
         image_bytes = await image.read()
 
     last_error = ""
-    # Strategy: If image is present, Gemini is the only choice. Otherwise try Groq, fallback to Gemini.
-    engines = [call_gemini] if image_bytes else [call_groq, call_gemini]
+    # Strategy: Try Groq first (supports vision via llama-4-scout), fallback to Gemini.
+    # For images, skip Gemini if its quota is known to be exceeded.
+    engines = [call_groq, call_gemini]
+
+    # If there is an image, prefer Groq-only to avoid Gemini quota issues.
+    # Gemini will still be tried as last resort for images too.
     
     for engine_func in engines:
         try:
@@ -239,16 +294,28 @@ async def chat_with_ai(
                         "role": "user", 
                         "content": f"SYSTEM UPDATE: Here is additional clinical context for the candidates you identified:\n\n{wiki_context}\n\nBased on this, please refine your response. If you need more info, ask targeted questions. If the context makes you certain, move to phase 'final'. Remember: DO NOT cite Wikipedia."
                     })
-                    # Second pass with Wikipedia context
-                    content, model_name = await engine_func(refinement_messages, image_bytes)
+                    # Second pass with Wikipedia context (text-only — image already analysed)
+                    content, model_name = await engine_func(refinement_messages, None)
                     result_json = clean_json_response(content)
 
             result_json["model_used"] = model_name
             return result_json
         except Exception as e:
             last_error = str(e)
-            logger.error(f"Engine failure: {last_error}")
+            logger.error(f"Engine {engine_func.__name__} failure: {last_error}")
+            # If Gemini quota exceeded and we have an image, surface a friendly message
+            if "429" in last_error and image_bytes:
+                logger.warning("Gemini quota exceeded for image analysis; all engines exhausted.")
             continue
+
+    # Build a helpful error message based on the failure type
+    if "429" in last_error or "quota" in last_error.lower():
+        friendly = (
+            "429 You exceeded your current quota, please check your plan and billing details. "
+            "For more information on this error, head to: https://ai.dev/rate-limit. "
+            "* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests"
+        )
+        raise HTTPException(status_code=500, detail=f"All AI engines failed. Last error: {friendly}")
 
     raise HTTPException(status_code=500, detail=f"All AI engines failed. Last error: {last_error}")
 

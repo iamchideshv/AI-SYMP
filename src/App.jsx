@@ -19,6 +19,7 @@ export default function App() {
   const [sessions, setSessions] = useState(INITIAL_SESSIONS)
   const [activeSession, setActiveSession] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [user, setUser] = useState({ name: 'Alex Kumar', plan: 'Free Plan' })
   const inputRef = useRef(null)
   const { messages, isTyping, isAnalyzing, sendMessage, clearMessages } = useChat()
 
@@ -64,7 +65,11 @@ export default function App() {
       setSessions(prev => [{ id: newId, title: truncated }, ...prev])
       setActiveSession(newId)
     }
-  }, [sendMessage, messages.length, activeSession])
+  }, [sendMessage, messages, activeSession])
+
+  const handleUpdateUser = useCallback((newData) => {
+    setUser(prev => ({ ...prev, ...newData }))
+  }, [])
 
   return (
     <div className="app-layout">
@@ -75,6 +80,8 @@ export default function App() {
         onNewSession={handleNewSession}
         sidebarOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        user={user}
+        onUpdateUser={handleUpdateUser}
       />
 
       <main className="main-panel">

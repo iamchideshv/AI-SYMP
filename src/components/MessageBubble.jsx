@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import DiagnosisCard from './DiagnosisCard'
+import FindDoctorsModal from './FindDoctorsModal'
 
 export default function MessageBubble({ message, onAction }) {
   const [showRemedyOptions, setShowRemedyOptions] = useState(false)
+  const [showFindDoctors, setShowFindDoctors] = useState(false)
   const isUser = message.role === 'user'
   const isError = !isUser && (
     message.content?.startsWith('Error:') ||
@@ -126,8 +128,8 @@ export default function MessageBubble({ message, onAction }) {
                       🔬 Solutions
                     </button>
                     <button
-                      className="action-pill"
-                      onClick={() => onAction && onAction('Find nearby doctors for this condition')}
+                      className="action-pill action-pill-find-doctors"
+                      onClick={() => setShowFindDoctors(true)}
                     >
                       🩺 Find doctors
                     </button>
@@ -138,6 +140,13 @@ export default function MessageBubble({ message, onAction }) {
           </>
         )}
       </div>
+
+      {showFindDoctors && (
+        <FindDoctorsModal
+          diagnoses={message.diagnoses}
+          onClose={() => setShowFindDoctors(false)}
+        />
+      )}
     </div>
   )
 }
