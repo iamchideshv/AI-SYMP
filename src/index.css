@@ -76,6 +76,7 @@ body {
 .app-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
 }
 
@@ -1186,12 +1187,13 @@ body {
     --input-h: 120px;
   }
 
-  /* Sidebar becomes full-screen drawer on mobile */
+  /* Sidebar becomes partial-screen drawer on mobile */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 75vw;
+    max-width: 320px;
     height: 100vh;
     height: 100dvh;
     transform: translateX(-100%);
@@ -1297,7 +1299,7 @@ body {
 
   /* Sidebar user menu pops upward */
   .user-menu {
-    width: calc(100vw - 48px);
+    width: calc(100% - 8px);
     bottom: calc(100% + 8px);
     left: 0;
   }
